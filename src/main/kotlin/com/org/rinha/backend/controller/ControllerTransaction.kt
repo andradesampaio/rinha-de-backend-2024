@@ -1,7 +1,7 @@
 package com.org.rinha.backend.controller
 
 import com.org.rinha.backend.model.request.TransactionRequest
-import com.org.rinha.backend.model.response.BalanceResponse
+import com.org.rinha.backend.model.response.TransactionResponse
 import com.org.rinha.backend.service.TransactionService
 import com.org.rinha.backend.utils.convertTransactionDtoToTransaction
 import jakarta.validation.Valid
@@ -18,7 +18,7 @@ class ControllerTransaction(
     fun createTransaction(
         @PathVariable clientId: Int,
         @Valid @RequestBody transaction: TransactionRequest,
-    ): ResponseEntity<BalanceResponse> =
+    ): ResponseEntity<TransactionResponse> =
         transactionService.createTransaction(
             convertTransactionDtoToTransaction(clientId, transaction)
         ).let {

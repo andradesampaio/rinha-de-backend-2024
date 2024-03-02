@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class BalanceResponse(
+data class TransactionResponse(
     @JsonProperty("saldo")
-    private val balance: Int = 0,
+    val balance: Int = 0,
     @JsonProperty("limite")
-    private val limit: Int = 0,
+    val limit: Int = 0,
 )
