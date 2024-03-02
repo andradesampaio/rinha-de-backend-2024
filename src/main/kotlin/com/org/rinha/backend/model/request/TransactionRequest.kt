@@ -4,12 +4,14 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 
-
 data class TransactionRequest(
-    @field:Min(value = 1, message = "Amount must not be blank")
+    @field:Min(value = 1)
     val valor: Int,
-    @field:[NotBlank Pattern(regexp="c|d",  message = "Only c|d pattern")]
+    @field:[
+    NotBlank
+    Pattern(regexp = "c|d", message = "Invalid value, accepted values C or D")
+    ]
     val tipo: String,
-    @field:NotBlank(message = "Description must not be blank")
-    val descricao: String
+    @field:NotBlank
+    val descricao: String,
 )

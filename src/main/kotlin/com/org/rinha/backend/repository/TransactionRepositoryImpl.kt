@@ -1,5 +1,6 @@
 package com.org.rinha.backend.repository
 
+import com.org.rinha.backend.exception.InvalidTransaction
 import com.org.rinha.backend.model.Cliente
 import com.org.rinha.backend.model.Transaction
 import org.springframework.jdbc.core.BeanPropertyRowMapper
@@ -11,17 +12,18 @@ import javax.sql.DataSource
 class TransactionRepositoryImpl(private val dataSource: DataSource) : TransactionRepository {
     private val jdbcTemplate = JdbcTemplate(dataSource)
 
-    override fun save(transaction: Transaction) {
-        val sql = "INSERT INTO transacoes (cliente_id, valor, tipo, descricao, realizada_em) VALUES (?, ?, ?, ?, ?)"
-        jdbcTemplate.update(
-            sql,
-            transaction.clientId,
-            transaction.amount,
-            transaction.type,
-            transaction.description,
-            transaction.createdAt,
+    override fun debit(transaction: Transaction): Pair<Int, Int> =
+        executeTransaction(
+            "SELECT new_balance, available_limit FROM debit(?, ?, ?)",
+            transaction
         )
-    }
+
+    override fun credit(transaction: Transaction): Pair<Int, Int> =
+        executeTransaction(
+            "SELECT new_balance, available_limit FROM credit(?, ?, ?)",
+            transaction
+        )
+
 
     override fun findClientById(clientId: Int): Cliente {
         val query =
@@ -35,5 +37,29 @@ class TransactionRepositoryImpl(private val dataSource: DataSource) : Transactio
         return jdbcTemplate.queryForStream(query, rowMapper, clientId)
             .findFirst()
             .orElseThrow { RuntimeException("Client not found") }
+    }
+
+    private fun executeTransaction(
+        sql: String,
+        transaction: Transaction
+    ): Pair<Int, Int> {
+        try {
+            return jdbcTemplate.query(
+                sql,
+                arrayOf(
+                    transaction.clientId,
+                    transaction.amount,
+                    transaction.description
+                )
+            ) { rs, _ ->
+                Pair(
+                    rs.getInt("new_balance"),
+                    rs.getInt("available_limit")
+                )
+            }
+                .first()
+        } catch (_: Exception) {
+            throw InvalidTransaction()
+        }
     }
 }

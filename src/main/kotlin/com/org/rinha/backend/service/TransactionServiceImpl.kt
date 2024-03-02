@@ -7,13 +7,15 @@ import org.springframework.stereotype.Service
 
 @Service
 class TransactionServiceImpl(private val transactionRepository: TransactionRepository) : TransactionService {
-
     override fun createTransaction(transaction: Transaction): BalanceResponse {
-        val client = transactionRepository.findClientById(transaction.clientId)
-        transactionRepository.save(transaction)
+        val (newBalance, availableLimit) = when (transaction.type) {
+            Transaction.TransactionType.C -> transactionRepository.credit(transaction)
+            Transaction.TransactionType.D -> transactionRepository.debit(transaction)
+        }
+
         return BalanceResponse(
-            balance = client.saldoValor,
-            limit = client.limite,
+            balance = newBalance,
+            limit = availableLimit,
         )
     }
 }
