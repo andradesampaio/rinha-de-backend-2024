@@ -4,7 +4,9 @@ import com.org.rinha.backend.model.Cliente
 import com.org.rinha.backend.model.Transaction
 
 interface TransactionRepository {
-    fun save(transaction: Transaction)
+    fun credit(transaction: Transaction): Pair<Int, Int>
+
+    fun debit(transaction: Transaction): Pair<Int, Int>
 
     fun findClientById(clientId: Int): Cliente
 }
