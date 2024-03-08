@@ -15,3 +15,6 @@ Submissão feita com:
 - `postgres` como banco de dados
 - `java` para api com as libs `java` e `springboot`
 - [repositório da api](https://github.com/andradesampaio/rinha-de-backend-2024)
+
+## Comando maven para executar a simulação
+mvn gatling:test -PGatling
