@@ -2,6 +2,7 @@ package com.org.rinha.backend.controller
 
 import com.org.rinha.backend.model.request.TransactionRequest
 import com.org.rinha.backend.model.response.TransactionResponse
+import com.org.rinha.backend.model.response.TransactionsResponse
 import com.org.rinha.backend.service.TransactionService
 import com.org.rinha.backend.utils.convertTransactionDtoToTransaction
 import jakarta.validation.Valid
@@ -29,10 +30,11 @@ class ControllerTransaction(
         }
 
 
-    @GetMapping("/{clientId}/extrato")
+    @GetMapping("/{customerId}/extrato")
     fun getBalance(
-        @PathVariable clientId: Int,
-    ): ResponseEntity<String> {
-        return ResponseEntity.ok("extrato")
-    }
+        @PathVariable customerId: Int,
+    ): ResponseEntity<TransactionsResponse> = ResponseEntity(
+        transactionService.getTransactions(customerId),
+        HttpStatus.OK
+    )
 }

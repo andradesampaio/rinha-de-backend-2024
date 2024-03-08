@@ -1,12 +1,22 @@
 package com.org.rinha.backend.repository
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.org.rinha.backend.exception.InvalidTransaction
-import com.org.rinha.backend.model.Cliente
+import com.org.rinha.backend.model.CustomerBalanceAndLimit
 import com.org.rinha.backend.model.Transaction
 import org.springframework.jdbc.core.BeanPropertyRowMapper
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 import javax.sql.DataSource
+
+data class Transactions(
+    var amount: Int = 0,
+    var type: String = "",
+    var description: String = "",
+    @JsonProperty("transacted_in")
+    var transactedIn: LocalDateTime = LocalDateTime.now()
+)
 
 @Repository
 class TransactionRepositoryImpl(private val dataSource: DataSource) : TransactionRepository {
@@ -24,19 +34,16 @@ class TransactionRepositoryImpl(private val dataSource: DataSource) : Transactio
             transaction
         )
 
-
-    override fun findClientById(clientId: Int): Cliente {
+    override fun getLastTransactions(customerId: Int, maxItems: Int): List<Transactions> {
         val query =
-            "SELECT cliente.id as clienteId, cliente.nome, cliente.limite, saldo.id as saldoId, saldo.valor as saldoValor " +
-                "FROM clientes as cliente, saldos as saldo " +
-                "WHERE cliente.id = saldo.id " +
-                "AND cliente.id = ?"
+            "select t.amount, t.\"type\", t.description, t.transacted_in " +
+            "  from transactions t" +
+            " where t.customer_id = ?" +
+            " limit ?;"
 
-        val rowMapper = BeanPropertyRowMapper(Cliente::class.java)
+        val rowMapper = BeanPropertyRowMapper(Transactions::class.java)
 
-        return jdbcTemplate.queryForStream(query, rowMapper, clientId)
-            .findFirst()
-            .orElseThrow { RuntimeException("Client not found") }
+        return jdbcTemplate.queryForStream(query, rowMapper, customerId, maxItems).toList() ?: throw InvalidTransaction()
     }
 
     private fun executeTransaction(

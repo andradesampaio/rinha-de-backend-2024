@@ -1,6 +1,6 @@
 package com.org.rinha.backend.repository
 
-import com.org.rinha.backend.model.Cliente
+import com.org.rinha.backend.model.CustomerBalanceAndLimit
 import com.org.rinha.backend.model.Transaction
 
 interface TransactionRepository {
@@ -8,5 +8,5 @@ interface TransactionRepository {
 
     fun debit(transaction: Transaction): Pair<Int, Int>
 
-    fun findClientById(clientId: Int): Cliente
+    fun getLastTransactions(customerId: Int, maxItems: Int): List<Transactions>
 }
